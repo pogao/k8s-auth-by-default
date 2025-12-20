@@ -25,7 +25,7 @@ Additionally, a **Controller** runs in the background to ensure consistency:
 - Kubernetes cluster (v1.19+)
 - `kubectl` configured to communicate with your cluster
 - `openssl` (for generating certificates via the deploy script)
-- Go 1.21+ (for building locally)
+- Go 1.25.4+ (for building locally)
 
 ## Building Locally
 
@@ -64,8 +64,9 @@ docker build -t k8s-auth-by-default:latest .
 The `scripts/deploy.sh` script will:
 1. Generate a CA and a server certificate for the webhook.
 2. Create a Kubernetes Secret `k8s-auth-by-default-certs` with the certificates.
-3. Apply the Deployment and Service.
-4. Patch the `MutatingWebhookConfiguration` with the CA bundle and apply it.
+3. Apply the necessary RBAC roles for the controller.
+4. Apply the Deployment and Service.
+5. Patch the `MutatingWebhookConfiguration` with the CA bundle and apply it.
 
 ```bash
 ./scripts/deploy.sh

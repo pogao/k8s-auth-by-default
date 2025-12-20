@@ -46,7 +46,8 @@ kubectl create secret tls ${SERVICE_NAME}-certs \
 # For Minikube/Kind, you might need to load the image manually.
 # docker build -t k8s-auth-by-default:latest .
 
-# Apply Deployment and Service
+# Apply RBAC, Deployment, and Service
+kubectl apply -f deploy/rbac.yaml
 kubectl apply -f deploy/deployment.yaml
 kubectl apply -f deploy/service.yaml
 

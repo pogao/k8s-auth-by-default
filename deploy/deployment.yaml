@@ -20,8 +20,8 @@ spec:
         image: k8s-auth-by-default:latest
         imagePullPolicy: Never # For local development with Kind/Minikube
         args:
-        - -tlsCertFile=/etc/webhook/certs/cert.pem
-        - -tlsKeyFile=/etc/webhook/certs/key.pem
+        - -tlsCertFile=/etc/webhook/certs/tls.crt
+        - -tlsKeyFile=/etc/webhook/certs/tls.key
         ports:
         - containerPort: 8443
         volumeMounts:
@@ -32,3 +32,4 @@ spec:
       - name: webhook-certs
         secret:
           secretName: k8s-auth-by-default-certs
+      serviceAccountName: k8s-auth-by-default-sa
