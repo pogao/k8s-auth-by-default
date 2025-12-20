@@ -17,7 +17,7 @@ openssl genrsa -out certs/server.key 2048
 openssl req -new -key certs/server.key -subj "/CN=${SERVICE_NAME}.${NAMESPACE}.svc" -out certs/server.csr
 
 # Create config file for SAN
-cat > certs/csr.conf <<EOF
+cat >certs/csr.conf <<EOF
 [req]
 req_extensions = v3_req
 distinguished_name = req_distinguished_name
@@ -38,30 +38,23 @@ openssl x509 -req -in certs/server.csr -CA certs/ca.crt -CAkey certs/ca.key -CAc
 
 # Create Secret
 kubectl create secret tls ${SERVICE_NAME}-certs \
-    --cert=certs/server.crt \
-    --key=certs/server.key \
-    --dry-run=client -o yaml | kubectl apply -f -
+	--cert=certs/server.crt \
+	--key=certs/server.key \
+	--dry-run=client -o yaml | kubectl apply -f -
 
 # Build Docker image (assuming Docker is available and pointing to the cluster registry if needed)
 # For Minikube/Kind, you might need to load the image manually.
 # docker build -t k8s-auth-by-default:latest .
 
-# Apply RBAC, Deployment, and Service
 kubectl apply -f deploy/rbac.yaml
 kubectl apply -f deploy/deployment.yaml
 kubectl apply -f deploy/service.yaml
 
 # Patch CA Bundle into Webhook Config and Apply
 CA_BUNDLE=$(cat certs/ca.crt | base64 | tr -d '\n')
-sed "s/caBundle: .*/caBundle: ${CA_BUNDLE}/" deploy/webhook-config.yaml > deploy/webhook-config-patched.yaml
-# If caBundle line doesn't exist, we need to add it. The simple sed above assumes it exists or we append it.
-# Better approach: use yq or just simple replacement if we know the structure.
-# Let's just overwrite the clientConfig part using a template approach or just kubectl patch.
+sed "s/caBundle: .*/caBundle: ${CA_BUNDLE}/" deploy/webhook-config.yaml >deploy/webhook-config-patched.yaml
 
-# Using kubectl patch is cleaner but requires the object to exist.
-# Let's generate the final file with the CA bundle.
-
-cat > deploy/webhook-config-patched.yaml <<EOF
+cat >deploy/webhook-config-patched.yaml <<EOF
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:

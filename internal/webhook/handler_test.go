@@ -138,9 +138,6 @@ func TestHandleAdmission(t *testing.T) {
 			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
 
-			// Create a handler with a no-op logger for testing
-			// In Go 1.21+ slog.New(slog.NewTextHandler(io.Discard, nil)) is a good way to have a discard logger
-			// Or just use stdout for debugging tests
 			logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 			h := NewHandler(logger)
 			h.HandleAdmission(w, req)

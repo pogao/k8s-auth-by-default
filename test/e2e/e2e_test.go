@@ -188,14 +188,6 @@ func TestWebhookE2E(t *testing.T) {
 	})
 
 	t.Run("Controller Opt-Out Logic", func(t *testing.T) {
-		// This test is tricky because the controller runs in the background.
-		// We need to simulate the controller's environment or just test the Reconcile logic directly in a separate unit test.
-		// Given the constraints of this E2E test (running the binary), testing the controller requires:
-		// 1. Creating a real Service with the annotation.
-		// 2. Creating a real Ingress with opt-out.
-		// 3. Waiting for the controller to remove the annotation.
-		// However, our E2E test currently only mocks the webhook requests, it doesn't run against a real K8s API server.
-		// The binary connects to the K8s API server specified in kubeconfig.
 		// Since we don't have a real K8s cluster in this environment, we should add a UNIT TEST for the controller instead.
 		t.Skip("Skipping controller E2E test as it requires a real K8s cluster")
 	})
@@ -242,7 +234,6 @@ func generateSelfSignedCert(t *testing.T, certPath, keyPath string) []byte {
 	defer keyOut.Close()
 	require.NoError(t, pem.Encode(keyOut, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(priv)}))
 
-	// Return the cert PEM for the client to trust
 	var certPEM bytes.Buffer
 	require.NoError(t, pem.Encode(&certPEM, &pem.Block{Type: "CERTIFICATE", Bytes: derBytes}))
 	return certPEM.Bytes()

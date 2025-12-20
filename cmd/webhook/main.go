@@ -19,7 +19,6 @@ import (
 func main() {
 	var parameters WebhookParameters
 
-	// get command line parameters
 	flag.IntVar(&parameters.port, "port", 8443, "Webhook server port.")
 	flag.StringVar(&parameters.certFile, "tlsCertFile", "/etc/webhook/certs/cert.pem", "File containing the x509 Certificate for HTTPS.")
 	flag.StringVar(&parameters.keyFile, "tlsKeyFile", "/etc/webhook/certs/key.pem", "File containing the x509 private key to --tlsCertFile.")
@@ -35,7 +34,6 @@ func main() {
 		Addr: fmt.Sprintf(":%d", parameters.port),
 	}
 
-	// Handle graceful shutdown
 	go func() {
 		if err := server.ListenAndServeTLS(parameters.certFile, parameters.keyFile); err != nil && err != http.ErrServerClosed {
 			logger.Error("Failed to listen and serve webhook", "error", err)
@@ -43,7 +41,6 @@ func main() {
 		}
 	}()
 
-	// Start the Controller Manager
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme: webhook.RuntimeScheme,
 	})
@@ -71,14 +68,12 @@ func main() {
 
 	logger.Info("Server started", "port", parameters.port)
 
-	// Listen for OS shutdown signals
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 	<-signalChan
 
 	logger.Info("Got OS shutdown signal, shutting down webhook server gracefully...")
 
-	// Create a context with a timeout for the graceful shutdown
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
